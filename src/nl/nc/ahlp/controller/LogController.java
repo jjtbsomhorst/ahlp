@@ -4,17 +4,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -36,7 +30,7 @@ public class LogController extends Observable {
 	
 	public LogController(LogParser parser) {
 		this.parser = parser;
-		entries = new ArrayList<LogEntry>(INTIAL_CAPACITY);
+		this.entries = new ArrayList<LogEntry>(INTIAL_CAPACITY);
 	}
 	
 	/**
@@ -66,7 +60,7 @@ public class LogController extends Observable {
 	 */
 	public void loadLogs(final File[] logFiles) throws IOException {
 		filtered= null;
-		entries = new ArrayList<LogEntry>();
+		this.entries.clear();
 		
 		for(File f : logFiles) {
 			if(f.isFile()) {
@@ -74,30 +68,11 @@ public class LogController extends Observable {
 			}
 		}
 		Collections.sort(entries);
-//		Collections.sort(entries, new Comparator<Map<String, String>>() {
-//			public int compare(Map<String, String> obj1, Map<String, String> obj2) {
-//				SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z", Locale.US);
-//				Date date1 = null;
-//				Date date2 = null;
-//				
-//				try {
-//					date1 = format.parse(obj1.get("Date"));
-//					date2 = format.parse(obj2.get("Date"));
-//				} catch (ParseException e) {
-//					e.printStackTrace();
-//				}
-//				
-//				// Newest to oldest.
-//				return date2.compareTo(date1);
-//			}
-//			
-//		});
 		
 		filtered = entries;
-		UpdateResult result = new UpdateResult(false, filtered, entries.size());
 		
 		LogController.this.setChanged();
-		LogController.this.notifyObservers(result);
+		LogController.this.notifyObservers(new UpdateResult(false, filtered, entries.size()));
 	}
 	
 	/**
@@ -108,7 +83,7 @@ public class LogController extends Observable {
 	 * @TODO Fix filter on logentry objects..
 	 */
 	public void filter(final String field, final String value, boolean regExpr) throws LogControllerException {
-			List<Map<String, String>> filtered = new ArrayList<Map<String, String>>();
+			List<LogEntry> filtered = new ArrayList<LogEntry>(10);
 			Pattern p = null;
 			
 			if(regExpr) {
@@ -138,7 +113,7 @@ public class LogController extends Observable {
 //			UpdateResult result = new UpdateResult(true, filtered, entries.size());
 //			
 //			LogController.this.setChanged();
-//			LogController.this.notifyObservers(result);
+//			LogController.this.notifyObservers(new UpdateResult(true,filtered,entries);
 	}
 	
 	/**

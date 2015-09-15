@@ -55,6 +55,7 @@ import nl.nc.ahlp.util.SwtUtil;
  *
  */
 public class MainUi implements Observer {
+	private static final String GFX_ICON_PATH = "/gfx/farmfresh/information.ico";
 	public static final String APP_VER_STR = "0.0.1";
 	public static final String APP_NAME = "AHLP";
 	
@@ -72,7 +73,6 @@ public class MainUi implements Observer {
 	private Button checkRegExpr = null;
 	
 	private LogController logController = null;
-//	private List<LogEntry> entries = null;
 	private UpdateResult entries = null;
 	private Clipboard clipboard = null;
 	
@@ -186,7 +186,7 @@ public class MainUi implements Observer {
 		
 		btnInfo = new Button(shlMain, SWT.CASCADE);
 		btnInfo.setToolTipText("Multitool");
-		btnInfo.setImage(SWTResourceManager.getImage(MainUi.class, "/gfx/farmfresh/information.ico"));
+		btnInfo.setImage(SWTResourceManager.getImage(MainUi.class, GFX_ICON_PATH));
 		btnInfo.setBounds(556, 11, 36, 24);
 		btnInfo.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {}
@@ -380,7 +380,7 @@ public class MainUi implements Observer {
 		comboFilter.select(0);
 		for(int i = 0; i < fields.length; i++) {
 			comboFilter.add(fields[i]);
-			
+		
 			TableColumn column = new TableColumn(table, SWT.NONE);
 			column.setText(fields[i]);
 			column.setWidth(50);
@@ -514,7 +514,7 @@ public class MainUi implements Observer {
 		Color filterValueColor = null;
 		Device device = Display.getCurrent ();
 		StringBuilder statusBuilder = new StringBuilder();
-		
+	
 		// Apply filter colors.
 		if(updateResult.isFiltered()) {
 			filterValueColor = new Color(device, 243, 241, 152);

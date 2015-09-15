@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,15 +48,9 @@ public class ApacheHttpdAccessLogParser extends LogParser {
 			Matcher m = null;
 			while(line != null) {
 				 m = p.matcher(line.trim());
-				if(m.find()) {
-//					Map<String, String> entry = new HashMap<String, String>(1);
+				 if(m.find()) {
 					LogEntry entry = new LogEntry();
-//					entry.put(KEY_HOSTNAME, m.group(1));
 					entry.setHostName(m.group(1));
-				
-//					String dateString = m.group(2);
-//					dateString = dateString.substring(1, dateString.length() - 1);
-//					entry.put(KEY_DATE, dateString);
 					try {
 						entry.setDate(m.group(2));
 					} catch (ParseException e) {
@@ -66,14 +58,9 @@ public class ApacheHttpdAccessLogParser extends LogParser {
 						e.printStackTrace();
 					}
 					
-					
-//					entry.put(KEYMETHOD, m.group(3));
 					entry.setMethod(m.group(3));
-//					entry.put(KEYREQUEST, m.group(4));
 					entry.setRequest(m.group(4));
-//					entry.put(KEY_PROTOCOL, m.group(5));
 					entry.setProtocol(m.group(5));
-//					entry.put(KEY_RESPONSE, m.group(6));
 					entry.setResponse(m.group(6));
 					listener.update(entry);
 				}

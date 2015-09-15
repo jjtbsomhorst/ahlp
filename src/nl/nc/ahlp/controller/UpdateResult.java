@@ -1,7 +1,6 @@
 package nl.nc.ahlp.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import nl.nc.ahlp.impl.LogEntry;
 
