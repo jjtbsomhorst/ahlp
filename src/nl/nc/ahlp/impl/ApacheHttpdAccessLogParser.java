@@ -19,7 +19,7 @@ import nl.nc.ahlp.LogParserListener;
 public class ApacheHttpdAccessLogParser extends LogParser {
 	// Non Java version regular expr: (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*(\[.*\])\s\"(\w+)\s(.*)\"\s(\d{3})      
 	private final String REG_EXPR = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*(\\[.*\\])\\s\\\"(\\w+)\\s(.*)\\s(.*)\\\"\\s(\\d{3})";
-	
+	private Pattern p = Pattern.compile(REG_EXPR);
 	public String getDescription() {
 		return "Apache HTTPD Access Log";
 	}
@@ -39,19 +39,15 @@ public class ApacheHttpdAccessLogParser extends LogParser {
 		
 		try {
 			String line = in.readLine();
-			Pattern p = Pattern.compile(REG_EXPR);
+			
 			
 			while(line != null) {
 				Matcher m = p.matcher(line.trim());
-				
 				if(m.find()) {
 					Map<String, String> entry = new HashMap<String, String>();
-					
 					entry.put("Hostname", m.group(1));
-					
 					String dateString = m.group(2);
 					dateString = dateString.substring(1, dateString.length() - 1);
-					
 					entry.put("Date", dateString);
 					entry.put("Method", m.group(3));
 					entry.put("Request", m.group(4));
