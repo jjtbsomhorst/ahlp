@@ -20,6 +20,7 @@ import java.util.regex.PatternSyntaxException;
 
 import nl.nc.ahlp.LogParser;
 import nl.nc.ahlp.LogParserListener;
+import nl.nc.ahlp.impl.LogEntry;
 
 /**
  * Responsible for loading and filtering.
@@ -27,15 +28,15 @@ import nl.nc.ahlp.LogParserListener;
  * @author Nino Camdzic
  */
 public class LogController extends Observable {
-	private static int INTIAL_CAPACITY = 50000;
+	private static int INTIAL_CAPACITY = 500;
 	
 	private LogParser parser = null;
-	private List<Map<String, String>> entries = null;
-	private List<Map<String, String>> filtered = null;
+	private List<LogEntry> entries = null;
+	private List<LogEntry> filtered = null;
 	
 	public LogController(LogParser parser) {
 		this.parser = parser;
-		entries = new ArrayList<Map<String, String>>(INTIAL_CAPACITY);
+		entries = new ArrayList<LogEntry>(INTIAL_CAPACITY);
 	}
 	
 	/**
@@ -44,12 +45,12 @@ public class LogController extends Observable {
 	 * @param filePath
 	 * @return
 	 */
-	protected List<Map<String, String>> loadLog(String filePath) throws IOException {
-		final List<Map<String, String>> entries = new ArrayList<Map<String, String>>();
+	protected List<LogEntry> loadLog(String filePath) throws IOException {
+		final List<LogEntry> entries = new ArrayList<LogEntry>();
 		FileReader reader = new FileReader(filePath);
 		
 		parser.parse(reader, new LogParserListener() {
-			public void update(Map<String, String> request) {
+			public void update(LogEntry request) {
 				entries.add(request);
 			}
 		});
@@ -64,33 +65,33 @@ public class LogController extends Observable {
 	 * @return
 	 */
 	public void loadLogs(final File[] logFiles) throws IOException {
-		entries = filtered = null;
-		entries = new ArrayList<Map<String, String>>();
+		filtered= null;
+		entries = new ArrayList<LogEntry>();
 		
 		for(File f : logFiles) {
 			if(f.isFile()) {
 				entries.addAll(LogController.this.loadLog(f.getAbsolutePath()));
 			}
 		}
-
-		Collections.sort(entries, new Comparator<Map<String, String>>() {
-			public int compare(Map<String, String> obj1, Map<String, String> obj2) {
-				SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z", Locale.US);
-				Date date1 = null;
-				Date date2 = null;
-				
-				try {
-					date1 = format.parse(obj1.get("Date"));
-					date2 = format.parse(obj2.get("Date"));
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
-				
-				// Newest to oldest.
-				return date2.compareTo(date1);
-			}
-			
-		});
+		Collections.sort(entries);
+//		Collections.sort(entries, new Comparator<Map<String, String>>() {
+//			public int compare(Map<String, String> obj1, Map<String, String> obj2) {
+//				SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z", Locale.US);
+//				Date date1 = null;
+//				Date date2 = null;
+//				
+//				try {
+//					date1 = format.parse(obj1.get("Date"));
+//					date2 = format.parse(obj2.get("Date"));
+//				} catch (ParseException e) {
+//					e.printStackTrace();
+//				}
+//				
+//				// Newest to oldest.
+//				return date2.compareTo(date1);
+//			}
+//			
+//		});
 		
 		filtered = entries;
 		UpdateResult result = new UpdateResult(false, filtered, entries.size());
@@ -104,6 +105,7 @@ public class LogController extends Observable {
 	 * 
 	 * @param field The field which will be searched.
 	 * @param value The value which to search for.
+	 * @TODO Fix filter on logentry objects..
 	 */
 	public void filter(final String field, final String value, boolean regExpr) throws LogControllerException {
 			List<Map<String, String>> filtered = new ArrayList<Map<String, String>>();
@@ -118,25 +120,25 @@ public class LogController extends Observable {
 				
 			}
 			
-			for(Map<String, String> entry : LogController.this.filtered) {
-				if(p != null) {
-					Matcher m = p.matcher(entry.get(field));
-					
-					if(m.find()) {
-						filtered.add(entry);
-					}
-				} else {
-					if(entry.get(field).equals(value)) {
-						filtered.add(entry);
-					}
-				}
-			}
+//			for(LogEntry entry : LogController.this.filtered) {
+//				if(p != null) {
+//					Matcher m = p.matcher(entry.get(field));
+//					
+//					if(m.find()) {
+//						filtered.add(entry);
+//					}
+//				} else {
+//					if(entry.get(field).equals(value)) {
+//						filtered.add(entry);
+//					}
+//				}
+//			}
 			
-			LogController.this.filtered = filtered;
-			UpdateResult result = new UpdateResult(true, filtered, entries.size());
-			
-			LogController.this.setChanged();
-			LogController.this.notifyObservers(result);
+//			LogController.this.filtered = filtered;
+//			UpdateResult result = new UpdateResult(true, filtered, entries.size());
+//			
+//			LogController.this.setChanged();
+//			LogController.this.notifyObservers(result);
 	}
 	
 	/**
@@ -176,18 +178,18 @@ public class LogController extends Observable {
 			}
 			
 			// The rest are the filtered entries.
-			for(Map<String, String> map : filtered) {
-				for(int i = 0; i < fields.length; i++) {
-					out.write(map.get(fields[i]));
-					
-					if(fields.length - i > 1) {
-						out.print(";");
-					} else {
-						out.println();
-					}
-				}
-			}
-			
+//			for(Map<LogEntry> map : filtered) {
+//				for(int i = 0; i < fields.length; i++) {
+//					out.write(map.get(fields[i]));
+//					
+//					if(fields.length - i > 1) {
+//						out.print(";");
+//					} else {
+//						out.println();
+//					}
+//				}
+//			}
+//			
 			result = true;
 		} finally {
 			if(out != null) {

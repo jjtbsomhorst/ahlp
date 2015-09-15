@@ -1,7 +1,7 @@
 package nl.nc.ahlp;
 
-import java.util.Map;
+import nl.nc.ahlp.impl.LogEntry;
 
 public interface LogParserListener {
-	void update(Map<String, String> request);
+	void update(LogEntry request);
 }

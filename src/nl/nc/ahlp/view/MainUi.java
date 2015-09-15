@@ -11,14 +11,6 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import nl.nc.ahlp.LogParser;
-import nl.nc.ahlp.ObtainLogParserException;
-import nl.nc.ahlp.controller.LogController;
-import nl.nc.ahlp.controller.LogControllerException;
-import nl.nc.ahlp.controller.UpdateResult;
-import nl.nc.ahlp.util.StringUtil;
-import nl.nc.ahlp.util.SwtUtil;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.dnd.Clipboard;
@@ -47,6 +39,15 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import nl.nc.ahlp.LogParser;
+import nl.nc.ahlp.ObtainLogParserException;
+import nl.nc.ahlp.controller.LogController;
+import nl.nc.ahlp.controller.LogControllerException;
+import nl.nc.ahlp.controller.UpdateResult;
+import nl.nc.ahlp.impl.LogEntry;
+import nl.nc.ahlp.util.StringUtil;
+import nl.nc.ahlp.util.SwtUtil;
+
 /**
  * Main View.
  * 
@@ -71,7 +72,8 @@ public class MainUi implements Observer {
 	private Button checkRegExpr = null;
 	
 	private LogController logController = null;
-	private List<Map<String, String>> entries = null;
+//	private List<LogEntry> entries = null;
+	private UpdateResult entries = null;
 	private Clipboard clipboard = null;
 	
 	private int tableMouseDownX = -1;
@@ -290,45 +292,41 @@ public class MainUi implements Observer {
 		
 		// Remove the old table and create a new one.
 		if(table != null) {
-			table.dispose();
-			table = null;
+			table.clearAll();
 			tableContainer.setContent(table);
-		}
-		
-		// Initialize a new table.
-		table = new Table(tableContainer, SWT.VIRTUAL | SWT.FULL_SELECTION);
-		table.setHeaderVisible(true);
-		table.setLinesVisible(false);
-		table.addListener(SWT.SetData, new Listener() {
-			public void handleEvent(Event e) {
-				if(entries != null && entries.size() > 0) {
-					if(e.index < entries.size()) {
-						TableItem item = (TableItem) e.item;
-						Map<String, String> entry = entries.get(e.index);
+		}else{
+			// Initialize a new table.
+			table = new Table(tableContainer, SWT.VIRTUAL | SWT.FULL_SELECTION);
+			table.setHeaderVisible(true);
+			table.setLinesVisible(false);
+			table.addListener(SWT.SetData, new Listener() {
+				public void handleEvent(Event e) {
+					
+					if(entries != null && !entries.isEmpty()) {
+						List<LogEntry> logEntries= entries.getEntries();
 						
-						String hostname = entry.get("Hostname");
-						String date = entry.get("Date");
-						String method = entry.get("Method");
-						String request = entry.get("Request");
-						String protocol = entry.get("Protocol");
-						String response = entry.get("Response");
-						
-						item.setText(new String[]{"" + (e.index + 1), hostname, date.toString(), method, request, protocol, response});
+						if(e.index < logEntries.size()) {
+							TableItem item = (TableItem) e.item;
+							LogEntry entry = logEntries.get(e.index);
+							item.setText(new String[]{"" + (e.index + 1), entry.getHostName(),entry.getDateAsString(), entry.getMethod(),entry.getRequest(), entry.getProtocol(), entry.getReponse()});
+						}
 					}
 				}
-			}
-		});
-		table.addListener(SWT.MouseDoubleClick, new Listener() {
-			public void handleEvent(Event e) {
-				doSetFilterValue(e.x, e.y);
-			}
-		 });
-		table.addListener(SWT.MouseDown, new Listener() {
-			public void handleEvent(Event e) {
-				tableMouseDownX = e.x;
-				tableMouseDownY = e.y;
-			}
-		});
+			});
+			table.addListener(SWT.MouseDoubleClick, new Listener() {
+				public void handleEvent(Event e) {
+					doSetFilterValue(e.x, e.y);
+				}
+			 });
+			table.addListener(SWT.MouseDown, new Listener() {
+				public void handleEvent(Event e) {
+					tableMouseDownX = e.x;
+					tableMouseDownY = e.y;
+				}
+			});
+		}
+		
+		
 		
 		tableContainer.setContent(table);
 		tableContainer.setMinSize(table.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -512,7 +510,7 @@ public class MainUi implements Observer {
 	 */
 	public void update(Observable observable, Object result) {
 		final UpdateResult updateResult = (UpdateResult) result;
-		entries = updateResult.getEntries();
+		entries = updateResult;
 		Color filterValueColor = null;
 		Device device = Display.getCurrent ();
 		StringBuilder statusBuilder = new StringBuilder();
