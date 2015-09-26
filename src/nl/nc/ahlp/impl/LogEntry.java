@@ -64,7 +64,4 @@ public class LogEntry extends HashMap<String, Object> implements Comparable<LogE
 	public int compareTo(LogEntry o) {
 		return o.getDate().compareTo(this.getDate());
 	}
-	
-
-	
 }

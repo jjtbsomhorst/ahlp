@@ -1,13 +1,18 @@
 package nl.nc.ahlp;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.LineNumberReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import nl.nc.ahlp.impl.LogEntry;
 
 /**
  * Abstract log parser.
@@ -16,10 +21,43 @@ import java.util.List;
  */
 public abstract class LogParser {
 	private static List<LogParser> instances = null;
+	private File source = null;
+	private long lineCount = -1;
+	
+	public void setFile(File f){
+		this.source = f;
+	}
 	
 	public abstract String getDescription();
 	public abstract String[] getFields();
-	public abstract void parse(Reader reader, LogParserListener listener);
+		
+	protected BufferedReader getReader() throws FileNotFoundException{
+		return new BufferedReader(new FileReader(source));
+	}
+	
+	public long getLineCount(){
+		BufferedReader reader = null;
+		if(this.lineCount < 0){
+			try {
+				reader = this.getReader();
+				while(reader.readLine() != null){
+					lineCount++;
+				}
+			} catch (IOException e) {
+				lineCount = 0;
+			} finally{
+				try {
+					reader.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return this.lineCount;
+	}
+		
+	public abstract LogEntry parseLine(String s);
 	
 	private static void initParsers() throws ObtainLogParserException {
 		if(instances == null || instances.size() == 0) {
@@ -69,4 +107,6 @@ public abstract class LogParser {
 		
 		return instances;
 	}
+
+	public abstract LogEntry parseLine(int lineNumber);
 }
